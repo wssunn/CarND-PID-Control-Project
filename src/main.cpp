@@ -38,12 +38,12 @@ int main() {
    * TODO: Initialize the pid variable.
    */
   double k_p = 0.07;
-  double k_i = 0.01;
-  double k_d = 1.5;
+  double k_i = 0.0001;
+  double k_d = 0.8;
   pid.Init(k_p, k_i, k_d);
 
   PID pid_throttle;
-  pid_throttle.Init(0.1, 0.001, 0.2);
+  pid_throttle.Init(0.1, 0.00001, 0.2);
 
   h.onMessage([&pid, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
@@ -73,13 +73,12 @@ int main() {
            */
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
-          if (abs(steer_value) > 0.5){
+          if (abs(steer_value) > 0.2){
             steer_value = abs(steer_value)/steer_value * 0.2;
           }
 
-
-          if (throttle_value > 0.0){
-            pid_throttle.UpdateError(cte * cte - 0.25);
+          pid_throttle.UpdateError(cte * cte - 0.25);
+          if (speed > 5.0){ 
             throttle_value += pid_throttle.TotalError();
           }
           else {throttle_value = 0.05;}
