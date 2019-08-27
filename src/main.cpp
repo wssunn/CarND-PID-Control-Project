@@ -73,8 +73,11 @@ int main() {
            */
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
+          if (abs(steer_value) > 0.5){
+            steer_value = abs(steer_value)/steer_value * 0.4;
+          }
 
-          if (speed > 0.0){
+          if (throttle_value > 0.0){
             pid_throttle.UpdateError(cte * cte - 0.25);
             throttle_value += pid_throttle.TotalError();
           }
@@ -84,6 +87,7 @@ int main() {
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
                     << std::endl;
+          std::cout << "Counter: " << pid.counter << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;

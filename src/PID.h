@@ -30,6 +30,7 @@ class PID {
    * @output The total PID error
    */
   double TotalError();
+  unsigned int counter;
 
  private:
   /**
