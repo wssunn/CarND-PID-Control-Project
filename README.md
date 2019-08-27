@@ -31,6 +31,7 @@ A PID controller adjuests 'future' action with regard to 'current' measure. When
 ### Decision process design and Parameter tuning
 In this project I have listed this situations and designed a specific throttle and steering angle setting for each of them.
 1. **start up or low speed** - quickly speed up to normal speed
-2. **cruise in staight line** - use throttle intermittently to maintain current speed, the steering angle has been set to have an absolute maximum to keep the system stable
+2. **cruise in staight line with maximum speed** - use throttle intermittently to maintain maximum speed, the steering angle has been set to have an absolute maximum to keep the system stable
 3. **driving around a bend** - a bend is shown by a large deviation from the central lane position, firstly the car decreases speed then use low speed and large steering angle combination to steer out of the bend
+
 In this project, the parameter is tuned manually.
