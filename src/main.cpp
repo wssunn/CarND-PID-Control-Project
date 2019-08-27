@@ -77,18 +77,26 @@ int main() {
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
           if (abs(steer_value) > 0.25){
+            //set a limit to steering angle
             steer_value = abs(steer_value)/steer_value * 0.25;
           }
 
           pid_throttle.UpdateError(cte * cte - 0.25);
-          //when at a bend
-          if (abs(cte_delta) > 0.3){throttle_value = -0.1;}
-          //normal driving
-          else if (speed > 5.0  && speed < 12.0){ 
+          //normal driving, exluding bend
+          if (speed > 5.0 && speed < 12.0 && abs(cte) < 2.0 && abs(cte_delta) < 0.3)
+          {
             throttle_value += pid_throttle.TotalError();
           }
+          //when at a bend
+          else if (abs(cte_delta) > 0.3 || abs(cte) > 2.0){
+            //first reduce speed
+            if (speed > 4.0) {throttle_value = -0.15;}
+            //then slowly move out
+            else {throttle_value = 0.02;}
+            steer_value *= 2.0; //quickly fix
+          }
           //speed limit
-          else if (speed > 12.0){throttle_value = 0.01;}
+          else if (speed > 12.0) { throttle_value = 0.01; }
           //low speed throttle setting
           else {throttle_value = 0.1;}
 
