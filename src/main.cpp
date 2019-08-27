@@ -67,7 +67,7 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           double steer_value;
-          double throttle_value = 0.2;
+          double throttle_value = 0.30;
           /**
            * TODO: Calculate steering value here, remember the steering value is
            *   [-1, 1].
@@ -83,25 +83,25 @@ int main() {
 
           pid_throttle.UpdateError(cte * cte - 0.25);
           //normal driving, exluding bend
-          if (speed > 5.0 && speed < 18.0 && abs(cte) < 1.5 && abs(cte_delta) < 0.3)
+          if (speed > 5.0 && speed < 24.0 && abs(cte) < 1.5 && abs(cte_delta) < 0.3)
           {
             throttle_value += pid_throttle.TotalError();
           }
           //when at a bend
           else if (abs(cte_delta) > 0.3 || abs(cte) > 1.5){
             //first reduce speed
-            if (speed > 5.0) {throttle_value = -0.25;}
+            if (speed > 10.0) {throttle_value = -0.35;}
             //then slowly move out
-            else {throttle_value = 0.15;}
+            else {throttle_value = 0.25;}
             steer_value *= 3.0; //quickly fix
           }
           //speed limit
-          else if (speed > 18.0) { throttle_value = 0.01;}
+          else if (speed > 24.0) { throttle_value = 0.01;}
           //low speed throttle setting
           else {
             throttle_value = 0.15;
-            if (speed < 2.0){throttle_value *= 3;}
-            else if (speed < 3.0){throttle_value *= 2;}
+            if (speed < 3.0){throttle_value *= 4;}
+            else if (speed < 5.0){throttle_value *= 2;}
           }
 
           cte_delta = cte - cte_prev;
