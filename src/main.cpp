@@ -39,7 +39,7 @@ int main() {
    */
   double k_p = 0.1;
   double k_i = 0.0001;
-  double k_d = 0.2;
+  double k_d = 1.0;
   pid.Init(k_p, k_i, k_d);
 
   PID pid_throttle;
@@ -64,7 +64,7 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           double steer_value;
-          double throttle_value = 0.3;
+          double throttle_value = 0.2;
           /**
            * TODO: Calculate steering value here, remember the steering value is
            *   [-1, 1].
@@ -74,8 +74,8 @@ int main() {
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
 
-          pid_throttle.UpdateError(cte-0.75);
-          throttle_value += pid_throttle.TotalError() * 0.1;
+          pid_throttle.UpdateError(cte*cte - 0.25);
+          throttle_value += pid_throttle.TotalError();
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
