@@ -37,8 +37,8 @@ int main() {
   /**
    * TODO: Initialize the pid variable.
    */
-  double k_p = 0.1;
-  double k_i = 0.0001;
+  double k_p = 0.07;
+  double k_i = 0.001;
   double k_d = 1.0;
   pid.Init(k_p, k_i, k_d);
 
@@ -74,8 +74,12 @@ int main() {
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
 
-          pid_throttle.UpdateError(cte*cte - 0.25);
-          throttle_value += pid_throttle.TotalError();
+          if (speed > 0.0){
+            pid_throttle.UpdateError(cte * cte - 0.25);
+            throttle_value += pid_throttle.TotalError();
+          }
+          else {throttle_value = 0.05;}
+          
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
