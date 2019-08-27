@@ -45,7 +45,10 @@ int main() {
   PID pid_throttle;
   pid_throttle.Init(0.1, 0.00001, 0.2);
 
-  h.onMessage([&pid, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
+  double cte_prev = 0.0;
+  double cte_delta = 0.0;
+
+  h.onMessage([&pid, &pid_throttle, &cte_delta, &cte_prev](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -73,22 +76,30 @@ int main() {
            */
           pid.UpdateError(cte);
           steer_value = pid.TotalError();
-          if (abs(steer_value) > 0.2){
-            steer_value = abs(steer_value)/steer_value * 0.2;
+          if (abs(steer_value) > 0.25){
+            steer_value = abs(steer_value)/steer_value * 0.25;
           }
 
           pid_throttle.UpdateError(cte * cte - 0.25);
           if (speed > 5.0){ 
             throttle_value += pid_throttle.TotalError();
           }
-          else {throttle_value = 0.05;}
+          //speed limit
+          else if (speed > 12.0){throttle_value = 0.01;}
+          else {throttle_value = 0.1;}
+
+          cte_delta = cte - cte_prev;
+          cte_prev = cte;
           
           
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
-                    << std::endl;
-          std::cout << "throttle" << throttle_value << std::endl;
-          std::cout << "speed:" << speed << "angle: " << angle << std::endl;
+          // std::cout << "CTE: " << cte << " Steering Value: " << steer_value 
+          //           << std::endl;
+          // std::cout << "throttle" << throttle_value << std::endl;
+          // std::cout << "speed:" << speed << "angle: " << angle << std::endl;
+          std::cout << "CTE: " << cte << std::endl;
+          std::cout << "change of CTE" << cte_delta << std::endl;
+
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
