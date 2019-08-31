@@ -26,7 +26,7 @@ From the picture, a PD controller can adjusts the steering angle and solve the o
 The integrative controller can adjust the steering angle by calculate an integral of all errors. Therefore it captures constant error.
 
 ### Weakness of PID controller
-A PID controller adjuests 'future' action with regard to 'current' measure. When the action takes effect the measure information is already out-dated. Hence a PID controller will act as if it has a delay. This determines that a PID controller will not work well under high speed because the 'delay' will severely affect the system.
+A PID controller adjuests 'future' action with regard to 'current' measure. When the action takes effect the measure information is already out-dated. Hence a PID controller will act as if it has a delay. This determines that a PID controller will **not work well under high speed** because the 'delay' will severely affect the system.
 
 ### Decision process design and Parameter tuning
 In this project I have listed this situations and designed a specific throttle and steering angle setting for each of them.
@@ -35,6 +35,57 @@ In this project I have listed this situations and designed a specific throttle a
 3. **driving around a bend** - a bend is shown by a large deviation from the central lane position, firstly the car decreases speed then use low speed and large steering angle combination to steer out of the bend
 
 In this project, the parameter is tuned manually.
+
+### Pseudocode
+Here is the pseudocode for the implement of this project. All code is in src/main.cpp and PID.cpp
+```cpp
+/*
+create a pid controller for adjusting steering angle
+create a pid_throttle controller 
+
+// throttle ~ [-1, 1]
+// cross_track_error ~ [-1, 1]
+
+During each refreshment process:
+    set initial throttle value = 0.3
+    obtain the cross_track_error (cte, distance to the central of road)
+
+    compute the pid total_error using cte   (main.cpp line 70)
+    adjust the steering angle with the total_error (main.cpp line 71 - 75)
+        set an absolute maximum to steering angle to avoid oversteering
+
+    compute the pid_throttle total_error using Error (main.cpp line 77)
+        Error = cte^2 - 0.25
+        // if the car is close to the central (cte ~ [-0.5, 0.5]):
+            //Error < 0; increase throttle, car accelerates
+        // else the car is far away from the central abs(cte) > 0.5:
+            //Error > 0; decrease throttle, car decelerates
+        
+    adjust car speed using throttle (main.cpp line 78 - 98)
+        if car speed is within normal cruise range && cte and d(cte)/dt not too big:
+            //cte is not too big indicates the car is not far away from central
+            throttle += pid.throttle.total_error
+
+        else if the car is far away from the central of lane or the car is experiencing erratic cte change:
+            if car speed is very quick:
+                reduce speed
+                increase steering angle to quickly move back to lane central
+            else if car speed is below speed for entering bend:
+                maintain current speed
+                increase steering angle to quickly move back to lane central
+        
+        else if car speed is reaching maximum:
+            turn off throttle
+
+        else if car is at low speed and in central of lane:
+            set high throttle value to quickly acclerate
+
+    compute cte_delta = cte - cte_prev  (main.cpp line 100 - 101)
+            cte_prev = cte
+            
+
+*/
+```
 
 ### Dependencies
 
